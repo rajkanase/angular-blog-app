@@ -1,27 +1,24 @@
 import { Injectable } from '@angular/core';
-import {Http, Response, RequestOptions, Headers} from '@angular/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tokenNotExpired } from 'angular2-jwt';
 import 'rxjs/add/operator/map';
 
 @Injectable()
 export class AuthService {
-  domain="http://localhost:3000";
+  domain="http://localhost:1000";
   authToken;
   user;
   options;
-
+  headerOptions;
+  headers = new HttpHeaders({'Content-Type': 'application/json'});
   constructor(
-    private http:Http
-  ) { }
+    private http:HttpClient
+  ) {
+  }
 
   createAuthenticationHeaders(){
     this.loadToken();
-    this.options = new RequestOptions({
-      headers: new Headers({
-        'Content-Type': 'application/json',
-        'authorization': this.authToken
-      })
-    });
+    this.options = new HttpHeaders({ 'Content-Type': 'application/json', 'authorization':this.authToken}  );
   }
 
   loadToken(){
@@ -29,19 +26,19 @@ export class AuthService {
   }
 
   registerUser(user){
-    return this.http.post(this.domain + '/api/register',user).map(res=>res.json());
+    return this.http.post(this.domain + '/api/register',user, {headers: this.headers});
   }
 
   checkEmail(email){
-    return this.http.get(this.domain + '/api/checkEmail' + email).map(res=>res.json());
+    return this.http.get(this.domain + '/api/checkEmail' + email);
   }
 
   checkUsername(username){
-    return this.http.get(this.domain + '/api/checkUsername' + username).map(res=>res.json());
+    return this.http.get(this.domain + '/api/checkUsername' + username);
   }
 
   login(user){
-    return this.http.post(this.domain + '/api/login', user).map(res=>res.json());
+    return this.http.post(this.domain + '/api/login', user, {headers:this.headers});
   }
 
   logout(){
@@ -63,7 +60,7 @@ export class AuthService {
 
   getProfile(){
     this.createAuthenticationHeaders();
-    return this.http.get(this.domain + '/api/profile', this.options).map(res=>res.json());
+    return this.http.get(this.domain + '/api/profile', {headers: this.options});
   }
 
 }

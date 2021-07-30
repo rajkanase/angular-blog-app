@@ -27,9 +27,9 @@ export class DeleteBlogComponent implements OnInit {
   ngOnInit() {
     this.currentUrl=this.activatedRoute.snapshot.params;
     this.blogService.getSingleBlog(this.currentUrl.id).subscribe(data=>{
-      if(!data.success){
+      if(!data['success']){
         this.messageClass='alert alert-danger';
-        this.message=data.message;
+        this.message=data['message'];
       }else{
       this.blog=data.blog;
       this.foundBlog=true;
@@ -40,12 +40,12 @@ export class DeleteBlogComponent implements OnInit {
   onDelete(){
     this.processing=true;
     this.blogService.deleteBlog(this.currentUrl.id).subscribe(data=>{
-      if(!data.success){
+      if(!data['success']){
         this.messageClass='alert alert-danger';
-        this.message=data.message;
+        this.message=data['message'];
       }else{
         this.messageClass='alert alert-success';
-        this.message=data.message;
+        this.message=data['message'];
         setTimeout(()=>{
           this.router.navigate(['/blog']);
         }, 2000);

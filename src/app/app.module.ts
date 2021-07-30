@@ -8,7 +8,7 @@ import { HomeComponent } from './home/home.component';
 import { MyRoutingModule } from './router';
 import { RegisterComponent } from './register/register.component';
 import { AuthService } from './services/auth.service';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './login/login.component';
 import { ProfileComponent } from './profile/profile.component';
 import { FlashMessagesModule } from 'angular2-flash-messages';
@@ -40,7 +40,7 @@ import { DeleteBlogComponent } from './delete-blog/delete-blog.component';
     ReactiveFormsModule,
     FlashMessagesModule,
     FormsModule,
-    HttpModule
+    HttpClientModule
   ],
   providers: [AuthService, AuthGuard, NotAuthGuard, BlogService],
   bootstrap: [AppComponent]

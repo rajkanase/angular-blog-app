@@ -78,20 +78,22 @@ const commentValidators = [{
 
 
 
-const blogSchema=new Schema({
-    title: { type: String, required: true, validate:titleValidators},
-    body: { type: String, required: true, validate: bodyValidators},
-    createdBy: { type: String, required: true},
-    createdAt: { type: Date, default: Date.now()},
-    likes: { type: Number, default: 0},
-    likedBy: { type: Array},
-    dislikes: { type: Number, default: 0},
-    dislikedBy: { type: Array},
+const blogSchema = new Schema({
+    title: { type: String, required: true, validate: titleValidators },
+    body: { type: String, required: true, validate: bodyValidators },
+    createdBy: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now() },
+    likes: { type: Number, default: 0 },
+    likedBy: { type: Array },
+    dislikes: { type: Number, default: 0 },
+    dislikedBy: { type: Array },
     comments: [{
         comment: { type: String, validate: commentValidators },
         commentator: { type: String }
-      }]
-   
+    }]
+
+}, {
+    usePushEach: true
 });
 
 module.exports=mongoose.model('Blog', blogSchema);

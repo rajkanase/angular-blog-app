@@ -37,7 +37,7 @@ export class BlogComponent implements OnInit {
 
   ngOnInit() {
     this.authService.getProfile().subscribe(profile=>{
-      this.username=profile.user.username;
+      this.username=profile['user'].username;
     })
     
     this.getAllBlogs();
@@ -88,13 +88,13 @@ export class BlogComponent implements OnInit {
       createdBy:this.username
     }
     this.blogService.newBlog(blog).subscribe(data=>{
-      if(!data.success){
+      if(!data['success']){
         this.messageClass='alert alert-danger';
-        this.message=data.message;
+        this.message=data['message'];
         this.processing=false;
       }else{
         this.messageClass='alert alert-success';
-        this.message=data.message;
+        this.message=data['message'];
         this.getAllBlogs();
         setTimeout(()=>{
           this.newPost=false;
@@ -109,7 +109,7 @@ export class BlogComponent implements OnInit {
 
 getAllBlogs(){
   this.blogService.getAllBlogs().subscribe(data=>{
-      this.blogPosts=data.message;
+      this.blogPosts=data['message'];
   })
 }
 

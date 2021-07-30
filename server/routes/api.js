@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const secret = require('crypto').randomBytes(256).toString('hex');
+const secret = '1dc884b987bb3ca0642f6be226e65408bf1c5e217ac3e4eb2463d96a4febefd5970db0efbeb9df5749';
 const Blog = require('../models/blog');
 
 
@@ -24,16 +24,16 @@ router.get('/', function (req, res) {
 
 router.post('/register', (req, res) => {
     if (!req.body.email) {
-        res.json({ success: false, message: 'You must provide an e-mail' });
+        res.status(400).json({ success: false, message: 'You must provide an e-mail' });
     } else {
         if (!req.body.username) {
-            res.json({ success: false, message: 'You must provide a username' });
+            res.status(400).json({ success: false, message: 'You must provide a username' });
         } else {
             if (!req.body.mobile) {
-                res.json({ success: false, message: 'You must provide a mobile number' });
+                res.status(400).json({ success: false, message: 'You must provide a mobile number' });
             } else {
                 if (!req.body.password) {
-                    res.json({ success: false, message: 'You must provide a password' });
+                    res.status(400).json({ success: false, message: 'You must provide a password' });
                 } else {
                     let user = new User({
                         email: req.body.email.toLowerCase(),
@@ -44,31 +44,31 @@ router.post('/register', (req, res) => {
                     user.save((err) => {
                         if (err) {
                             if (err.code === 11000) {
-                                res.json({ success: false, message: 'E-mail or Username already exists..!' });
+                                res.status(400).json({ success: false, message: 'E-mail or Username already exists..!' });
                             } else {
                                 if (err.errors) {
                                     if (err.errors.email) {
-                                        res.json({ success: false, message: err.errors.email.message });
+                                        res.status(400).json({ success: false, message: err.errors.email.message });
                                     } else {
                                         if (err.errors.username) {
-                                            res.json({ success: false, message: err.errors.username.message });
+                                            res.status(400).json({ success: false, message: err.errors.username.message });
                                         } else {
                                             if (err.errors.password) {
-                                                res.json({ success: false, message: err.errors.password.message });
+                                                res.status(400).json({ success: false, message: err.errors.password.message });
                                             } else {
                                                 if (err.errors.mobile) {
-                                                    res.json({ success: false, message: err.errors.mobile.message })
+                                                    res.status(400).json({ success: false, message: err.errors.mobile.message })
                                                 }
                                             }
                                         }
                                     }
                                 } else {
                                     console.log(err);
-                                    res.json({ success: false, message: 'Could not save user. Error:', err });
+                                    res.status(400).json({ success: false, message: 'Could not save user. Error:', err });
                                 }
                             }
                         } else {
-                            res.json({ success: true, message: 'User saved successfully !' });
+                            res.status(200).json({ success: true, message: 'User saved successfully !' });
                         }
                     });
                 }
@@ -86,18 +86,20 @@ router.post('/register', (req, res) => {
 
 
 router.get('/checkEmail/:email', (req, res) => {
-    res.send(req.params.email);
+    // res.send(req.params.email);
     if (!req.params.email) {
-        res.json({ success: false, message: 'Email was not provided' });
+        res.status(400).json({ success: false, message: 'Email was not provided' });
     } else {
         User.findOne({ email: req.params.email }, (err, user) => {
             if (err) {
-                res.json({ success: false, message: err });
+                console.log('err', err)
+                res.status(400).json({ success: false, message: err });
             } else {
                 if (user) {
-                    res.json({ success: false, message: 'Email is already taken.' });
+                    res.status(400).json({ success: false, message: 'Email is already taken.' });
                 } else {
-                    res.json({ success: true, message: 'Email is available.' });
+                    console.log('Email is available.');
+                    res.status(200).json({ success: true, message: 'Email is available.' });
                 }
             }
         });
@@ -106,16 +108,16 @@ router.get('/checkEmail/:email', (req, res) => {
 
 router.get('/checkUsername/:username', (req, res) => {
     if (!req.params.username) {
-        res.json({ success: false, message: 'Username was not provided' });
+        res.status(400).json({ success: false, message: 'Username was not provided' });
     } else {
         User.findOne({ username: req.params.username }, (err, user) => {
             if (err) {
-                res.json({ success: false, message: err });
+                res.status(400).json({ success: false, message: err });
             } else {
                 if (user) {
-                    res.json({ success: false, message: 'Username is already taken.' });
+                    res.status(400).json({ success: false, message: 'Username is already taken.' });
                 } else {
-                    res.json({ success: true, message: 'Username is available.' });
+                    res.status(200).json({ success: true, message: 'Username is available.' });
                 }
             }
         });
@@ -144,86 +146,30 @@ router.get('/checkUsername/:username', (req, res) => {
 
 router.post('/login', (req, res) => {
     if (!req.body.username) {
-        res.json({ success: false, message: 'Username was not provided' });
+        res.status(400).json({ success: false, message: 'Username was not provided' });
     } else {
         if (!req.body.password) {
-            res.json({ success: false, message: 'Password was not provided' });
+            res.status(400).json({ success: false, message: 'Password was not provided' });
         } else {
             User.findOne({ username: req.body.username.toLowerCase() }, (err, user) => {
                 if (err) {
-                    res.json({ success: false, message: err });
+                    res.status(400).json({ success: false, message: err });
                 } else {
                     if (!user) {
-                        res.json({ success: false, message: 'Username not valid.' });
+                        res.status(400).json({ success: false, message: 'Username not valid.' });
                     } else {
                         const validPassword = user.comparePassword(req.body.password);
                         if (!validPassword) {
-                            res.json({ success: false, message: 'Password invalid' });
+                            res.status(400).json({ success: false, message: 'Password invalid' });
                         } else {
                             const token = jwt.sign({ userId: user._id }, secret, { expiresIn: '24h' });
-                            res.json({ success: true, message: 'Success', token: token, user: { username: user.username } });
+                            res.status(200).json({ success: true, message: 'Success', token: token, user: { userId: user._id, username: user.username } });
                         }
                     }
                 }
             });
         }
     }
-});
-
-
-
-router.post('/newBlog', (req, res) => {
-    if (!req.body.title) {
-        res.json({ success: false, message: 'Blog title was not provided.' });
-    } else {
-        if (!req.body.body) {
-            res.json({ success: false, message: 'Blog body was not provided.' });
-        } else {
-            if (!req.body.createdBy) {
-                res.json({ success: false, message: 'Blog creator was not provided.' });
-            } else {
-                const blog = new Blog({
-                    title: req.body.title,
-                    body: req.body.body,
-                    createdBy: req.body.createdBy
-                });
-                blog.save((err) => {
-                    if (err) {
-                        if (err.errors) {
-                            if (err.errors.title) {
-                                res.json({ success: false, message: err.errors.title.message });
-                            } else {
-                                if (err.errors.body) {
-                                    res.json({ success: false, message: err.errors.body.message });
-                                } else {
-                                    res.json({ success: false, message: errmsg });
-                                }
-                            }
-                        } else {
-                            res.json({ success: false, message: err });
-                        }
-                    } else {
-                        res.json({ success: true, message: 'Blog saved!' });
-                    }
-                });
-            }
-        }
-    }
-});
-
-
-router.get('/allBlogs', (req, res) => {
-    Blog.find({}, (err, blogs) => {
-        if (err) {
-            res.json({ success: false, message: err });
-        } else {
-            if (!blogs) {
-                res.json({ success: false, message: 'No blogs found !' });
-            } else {
-                res.json({ success: true, message: blogs });
-            }
-        }
-    }).sort({ '_id': -1 });
 });
 
 // router.get('/singleBlog/:id',(req,res)=>{
@@ -301,13 +247,14 @@ router.get('/allBlogs', (req, res) => {
 
 router.use((req, res, next) => {
     const token = req.headers['authorization'];
+    // console.log('token', token)
 
     if (!token) {
-        res.json({ success: false, message: 'No token provided' });
+        res.status(400).json({ success: false, message: 'No token provided' });
     } else {
         jwt.verify(token, secret, (err, decoded) => {
             if (err) {
-                res.json({ success: false, message: 'Token Invalid:' + err });
+                res.status(400).json({ success: false, message: 'Token Invalid:' + err });
             } else {
                 req.decoded = decoded;
                 next();
@@ -317,15 +264,69 @@ router.use((req, res, next) => {
 });
 
 
+router.post('/newBlog', (req, res) => {
+    if (!req.body.title) {
+        res.status(400).json({ success: false, message: 'Blog title was not provided.' });
+    } else {
+        if (!req.body.body) {
+            res.status(400).json({ success: false, message: 'Blog body was not provided.' });
+        } else {
+            if (!req.body.createdBy) {
+                res.status(400).json({ success: false, message: 'Blog creator was not provided.' });
+            } else {
+                const blog = new Blog({
+                    title: req.body.title,
+                    body: req.body.body,
+                    createdBy: req.body.createdBy
+                });
+                blog.save((err) => {
+                    if (err) {
+                        if (err.errors) {
+                            if (err.errors.title) {
+                                res.status(400).json({ success: false, message: err.errors.title.message });
+                            } else {
+                                if (err.errors.body) {
+                                    res.status(400).json({ success: false, message: err.errors.body.message });
+                                } else {
+                                    res.status(400).json({ success: false, message: errmsg });
+                                }
+                            }
+                        } else {
+                            res.status(400).json({ success: false, message: err });
+                        }
+                    } else {
+                        res.status(200).json({ success: true, message: 'Blog saved!' });
+                    }
+                });
+            }
+        }
+    }
+});
+
+router.get('/allBlogs', (req, res) => {
+    Blog.find({}, (err, blogs) => {
+        if (err) {
+            res.status(400).json({ success: false, message: err });
+        } else {
+            if (!blogs) {
+                res.status(400).json({ success: false, message: 'No blogs found !' });
+            } else {
+                res.status(200).json({ success: true, message: blogs });
+            }
+        }
+    }).sort({ '_id': -1 });
+});
+
+
 router.get('/profile', (req, res) => {
     User.findOne({ _id: req.decoded.userId }).select('username email').exec((err, user) => {
         if (err) {
-            res.json({ success: false, message: err });
+            res.status(400).json({ success: false, message: err });
         } else {
             if (!user) {
-                res.json({ success: false, message: 'User not found.' });
+                res.status(400).json({ success: false, message: 'User not found.' });
             } else {
-                res.json({ success: true, user: user });
+                res.status(200).json({ success: true, user: user });
             }
         }
     })
@@ -333,26 +334,26 @@ router.get('/profile', (req, res) => {
 
 router.get('/singleBlog/:id', (req, res) => {
     if (!req.params.id) {
-        res.json({ success: false, message: 'Id was not provided.' });
+        res.status(400).json({ success: false, message: 'Id was not provided.' });
     } else {
         Blog.findOne({ _id: req.params.id }, (err, blog) => {
             if (err) {
-                res.json({ success: false, message: err });
+                res.status(400).json({ success: false, message: err });
             } else {
                 if (!blog) {
-                    res.json({ success: false, message: 'No blog found.' });
+                    res.status(400).json({ success: false, message: 'No blog found.' });
                 } else {
                     User.findOne({ _id: req.decoded.userId }, (err, user) => {
                         if (err) {
-                            res.json({ success: false, message: err });
+                            res.status(400).json({ success: false, message: err });
                         } else {
                             if (!user) {
-                                res.json({ success: false, message: 'Unable to authenticate user.' });
+                                res.status(400).json({ success: false, message: 'Unable to authenticate user.' });
                             } else {
                                 if (user.username !== blog.createdBy) {
-                                    res.json({ success: false, message: 'You are not authorized to edit this blog.' });
+                                    res.status(400).json({ success: false, message: 'You are not authorized to edit this blog.' });
                                 } else {
-                                    res.json({ success: true, blog: blog });
+                                    res.status(200).json({ success: true, blog: blog });
                                 }
                             }
                         }
@@ -365,32 +366,32 @@ router.get('/singleBlog/:id', (req, res) => {
 
 router.put('/updateBlog', (req, res) => {
     if (!req.body._id) {
-        res.json({ success: false, message: 'Id was not provided.' });
+        res.status(400).json({ success: false, message: 'Id was not provided.' });
     } else {
         Blog.findOne({ _id: req.body._id }, (err, blog) => {
             if (err) {
-                res.json({ success: false, message: 'Not valid blog Id.' });
+                res.status(400).json({ success: false, message: 'Not valid blog Id.' });
             } else {
                 if (!blog) {
-                    res.json({ success: false, message: 'Blog not found.' });
+                    res.status(400).json({ success: false, message: 'Blog not found.' });
                 } else {
                     User.findOne({ _id: req.decoded.userId }, (err, user) => {
                         if (err) {
-                            res.json({ success: false, message: err });
+                            res.status(400).json({ success: false, message: err });
                         } else {
                             if (!user) {
-                                res.json({ success: false, message: 'Unable to authenticate user.' });
+                                res.status(400).json({ success: false, message: 'Unable to authenticate user.' });
                             } else {
                                 if (user.username !== blog.createdBy) {
-                                    res.json({ success: false, message: 'You are not authenticate to edit this blog post.' });
+                                    res.status(400).json({ success: false, message: 'You are not authenticate to edit this blog post.' });
                                 } else {
                                     blog.title = req.body.title;
                                     blog.body = req.body.body;
                                     blog.save((err) => {
                                         if (err) {
-                                            res.json({ success: false, message: err });
+                                            res.status(400).json({ success: false, message: err });
                                         } else {
-                                            res.json({ success: true, message: 'Blog updated.' })
+                                            res.status(200).json({ success: true, message: 'Blog updated.' })
                                         }
                                     });
                                 }
@@ -405,30 +406,30 @@ router.put('/updateBlog', (req, res) => {
 
 router.delete('/deleteBlog/:id', (req, res) => {
     if (!req.params.id) {
-        res.json({ success: false, message: 'Id was not provided.' });
+        res.status(400).json({ success: false, message: 'Id was not provided.' });
     } else {
         Blog.findOne({ _id: req.params.id }, (err, blog) => {
             if (err) {
-                res.json({ success: false, message: err });
+                res.status(400).json({ success: false, message: err });
             } else {
                 if (!blog) {
-                    res.json({ success: false, message: 'Blog not found.' });
+                    res.status(400).json({ success: false, message: 'Blog not found.' });
                 } else {
                     User.findOne({ _id: req.decoded.userId }, (err, user) => {
                         if (err) {
-                            res.json({ success: false, message: err });
+                            res.status(400).json({ success: false, message: err });
                         } else {
                             if (!user) {
-                                res.json({ success: true, message: 'Unable to authenticate the user.' })
+                                res.status(400).json({ success: true, message: 'Unable to authenticate the user.' })
                             } else {
                                 if (user.username !== blog.createdBy) {
-                                    res.json({ success: true, message: 'You are not authorized to delete this post.' })
+                                    res.status(400).json({ success: true, message: 'You are not authorized to delete this post.' })
                                 } else {
                                     blog.remove((err) => {
                                         if (err) {
-                                            res.json({ success: true, message: err });
+                                            res.status(400).json({ success: true, message: err });
                                         } else {
-                                            res.json({ success: true, message: 'Blog deleted.' })
+                                            res.status(200).json({ success: true, message: 'Blog deleted.' })
                                         }
                                     });
                                 }
@@ -443,27 +444,27 @@ router.delete('/deleteBlog/:id', (req, res) => {
 
 router.put('/likeBlog', (req, res) => {
     if (!req.body.id) {
-        res.json({ success: false, message: 'Id was not provided.' });
+        res.status(400).json({ success: false, message: 'Id was not provided.' });
     } else {
         Blog.findOne({ _id: req.body.id }, (err, blog) => {
             if (err) {
-                res.json({ success: false, message: err });
+                res.status(400).json({ success: false, message: err });
             } else {
                 if (!blog) {
-                    res.json({ success: false, message: 'Blog not found.' });
+                    res.status(400).json({ success: false, message: 'Blog not found.' });
                 } else {
                     User.findOne({ _id: req.decoded.userId }, (err, user) => {
                         if (err) {
-                            res.json({ success: false, message: err });
+                            res.status(400).json({ success: false, message: err });
                         } else {
                             if (!user) {
-                                res.json({ success: false, message: 'Cannot authenticate User.' });
+                                res.status(400).json({ success: false, message: 'Cannot authenticate User.' });
                             } else {
                                 if (user.username === blog.createdBy) {
-                                    res.json({ success: false, message: 'Cannot like your own post.' });
+                                    res.status(400).json({ success: false, message: 'Cannot like your own post.' });
                                 } else {
                                     if (blog.likedBy.includes(user.username)) {
-                                        res.json({ success: false, message: 'You already like this post.' });
+                                        res.status(400).json({ success: false, message: 'You already like this post.' });
                                     } else {
                                         if (blog.dislikedBy.includes(user.username)) {
                                             blog.dislikes--;
@@ -471,21 +472,21 @@ router.put('/likeBlog', (req, res) => {
                                             blog.dislikedBy.splice(arrayIndex, 1);
                                             blog.likes++;
                                             blog.likedBy.push(user.username);
-                                            blog.save((err) => {
+                                            blog.save((err, savedBlog) => {
                                                 if (err) {
-                                                    res.json({ success: false, message: err });
+                                                    res.status(400).json({ success: false, message: err });
                                                 } else {
-                                                    res.json({ success: true, message: 'Blog liked!' });
+                                                    res.status(200).json({ success: true, message: 'Blog liked!', newBlog: savedBlog });
                                                 }
                                             });
                                         } else {
                                             blog.likes++;
                                             blog.likedBy.push(user.username);
-                                            blog.save((err) => {
+                                            blog.save((err, savedBlog) => {
                                                 if (err) {
-                                                    res.json({ success: false, message: err });
+                                                    res.status(400).json({ success: false, message: err });
                                                 } else {
-                                                    res.json({ success: true, message: 'Blog liked!' });
+                                                    res.status(200).json({ success: true, message: 'Blog liked!', newBlog: savedBlog });
                                                 }
                                             });
                                         }
@@ -504,27 +505,27 @@ router.put('/likeBlog', (req, res) => {
 
 router.put('/dislikeBlog', (req, res) => {
     if (!req.body.id) {
-        res.json({ success: false, message: 'Id was not provided.' });
+        res.status(400).json({ success: false, message: 'Id was not provided.' });
     } else {
         Blog.findOne({ _id: req.body.id }, (err, blog) => {
             if (err) {
-                res.json({ success: false, message: err });
+                res.status(400).json({ success: false, message: err });
             } else {
                 if (!blog) {
-                    res.json({ success: false, message: 'Blog not found.' });
+                    res.status(400).json({ success: false, message: 'Blog not found.' });
                 } else {
                     User.findOne({ _id: req.decoded.userId }, (err, user) => {
                         if (err) {
-                            res.json({ success: false, message: err });
+                            res.status(400).json({ success: false, message: err });
                         } else {
                             if (!user) {
-                                res.json({ success: false, message: 'Cannot authenticate User.' });
+                                res.status(400).json({ success: false, message: 'Cannot authenticate User.' });
                             } else {
                                 if (user.username === blog.createdBy) {
-                                    res.json({ success: false, message: 'Cannot like your own post.' });
+                                    res.status(400).json({ success: false, message: 'Cannot like your own post.' });
                                 } else {
                                     if (blog.dislikedBy.includes(user.username)) {
-                                        res.json({ success: false, message: 'You already dislike this post.' });
+                                        res.status(400).json({ success: false, message: 'You already dislike this post.' });
                                     } else {
                                         if (blog.likedBy.includes(user.username)) {
                                             blog.likes--;
@@ -532,21 +533,21 @@ router.put('/dislikeBlog', (req, res) => {
                                             blog.likedBy.splice(arrayIndex, 1);
                                             blog.dislikes++;
                                             blog.dislikedBy.push(user.username);
-                                            blog.save((err) => {
+                                            blog.save((err, savedBlog) => {
                                                 if (err) {
-                                                    res.json({ success: false, message: err });
+                                                    res.status(400).json({ success: false, message: err });
                                                 } else {
-                                                    res.json({ success: true, message: 'Blog disliked!' });
+                                                    res.status(200).json({ success: true, message: 'Blog disliked!', newBlog: savedBlog });
                                                 }
                                             });
                                         } else {
                                             blog.dislikes++;
                                             blog.dislikedBy.push(user.username);
-                                            blog.save((err) => {
+                                            blog.save((err, savedBlog) => {
                                                 if (err) {
-                                                    res.json({ success: false, message: err });
+                                                    res.status(400).json({ success: false, message: err });
                                                 } else {
-                                                    res.json({ success: true, message: 'Blog liked!' });
+                                                    res.status(200).json({ success: true, message: 'Blog liked!', newBlog: savedBlog });
                                                 }
                                             });
                                         }
@@ -564,34 +565,34 @@ router.put('/dislikeBlog', (req, res) => {
 
 router.post('/comment', (req, res) => {
     if (!req.body.comment) {
-        res.json({ success: false, message: 'Comment was not provided.' });
+        res.status(400).json({ success: false, message: 'Comment was not provided.' });
     } else {
         if (!req.body.id) {
-            res.json({ success: false, message: 'Id was not provided.' });
+            res.status(400).json({ success: false, message: 'Id was not provided.' });
         } else {
             Blog.findOne({ _id: req.body.id }, (err, blog) => {
                 if (err) {
-                    res.json({ success: false, message: err });
+                    res.status(400).json({ success: false, message: err });
                 } else {
                     if (!blog) {
-                        res.json({ success: false, message: 'Blog not found.' });
+                        res.status(400).json({ success: false, message: 'Blog not found.' });
                     } else {
                         User.findOne({ _id: req.decoded.userId }, (err, user) => {
                             if (err) {
-                                res.json({ success: false, message: err });
+                                res.status(400).json({ success: false, message: err });
                             } else {
                                 if (!user) {
-                                    res.json({ success: false, message: 'Cannot authenticate user.' });
+                                    res.status(400).json({ success: false, message: 'Cannot authenticate user.' });
                                 } else {
                                     blog.comments.push({
                                         comment: req.body.comment,
                                         commentator: user.username
                                     });
-                                    blog.save((err) => {
+                                    blog.save((err, savedBlog) => {
                                         if (err) {
-                                            res.json({ success: false, message: err });
+                                            res.status(400).json({ success: false, message: err });
                                         } else {
-                                            res.json({ success: true, message: 'Comment Saved.' });
+                                            res.status(200).json({ success: true, message: 'Comment Saved.', newBlog: savedBlog });
                                         }
                                     });
                                 }
@@ -605,4 +606,3 @@ router.post('/comment', (req, res) => {
 });
 
 module.exports = router;
-

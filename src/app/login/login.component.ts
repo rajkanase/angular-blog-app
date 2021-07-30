@@ -41,14 +41,14 @@ export class LoginComponent implements OnInit {
       password:this.form.get('password').value
     }
     this.authService.login(user).subscribe(data=>{
-      if(!data.success){
+      if(!data['success']){
         this.messageClass='alert alert-danger';
-        this.message=data.message;
+        this.message=data['message'];
         this.processing=false;
       }else{
         this.messageClass='alert alert-success';
-        this.message=data.message;
-        this.authService.storeUserData(data.token,data.user);
+        this.message=data['message'];
+        this.authService.storeUserData(data['token'],data['user']);
         setTimeout(()=>{
 
           if(this.previousUrl){
